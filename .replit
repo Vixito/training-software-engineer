@@ -11,13 +11,12 @@ language = "python3"
 enabledForHosting = true
 
 [run]
-args = ["sh", "-c", "python3 -m uvicorn main:app --host 0.0.0.0 --port 8000"]
+args = ["sh", "-c", "UV_PROJECT_ENVIRONMENT=.venv uv sync && .venv/bin/python -m uvicorn main:app --host 0.0.0.0 --port 8000"]
 
 [deployment]
 deploymentTarget = "cloudrun"
-run = "python3 -m uvicorn main:app --host 0.0.0.0 --port 8000"
+run = "sh -c 'UV_PROJECT_ENVIRONMENT=.venv uv sync && .venv/bin/python -m uvicorn main:app --host 0.0.0.0 --port 8000'"
 
 [[ports]]
 localPort = 8000
 externalPort = 80
-exposeLocalhost = true
