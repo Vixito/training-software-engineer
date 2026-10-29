@@ -7,7 +7,7 @@ packages = ["libxcrypt"]
 deploymentTarget = "cloudrun"
 
 [deployment.run]
-args = ["sh", "-c", "uvicorn main:app --host 0.0.0.0 --port 8000"]
+args = ["sh", "-c", "uv run uvicorn main:app --host 0.0.0.0 --port 8000"]
 
 [deployment.run.env]
 file = "main.py"
