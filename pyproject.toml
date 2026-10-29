@@ -1,6 +1,11 @@
 [project]
-name = "repl-nix-workspace"
+name = "ai-gateway"
 version = "0.1.0"
-description = "Add your description here"
-requires-python = ">=3.11"
-dependencies = []
+description = "AI Gateway construido con FastAPI y SQLite"
+requires-python = ">=3.15"
+dependencies = [
+  "fastapi",
+  "uvicorn[standard]",
+  "pytest",
+  "httpx"
+]
