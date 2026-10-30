@@ -3,6 +3,8 @@ import database
 
 class Error_UsuarioNoEncontrado(Exception):
   pass
+class Error_RegistroUsuarioInválido(Exception):
+  pass
 
 def obtener_tiempo():
   return time.time()
@@ -21,7 +23,10 @@ def verificar_usuario_registrado(usuario):
     raise Error_UsuarioNoEncontrado("Usuario no registrado.")
 
 def service_registrar_usuario(usuario, nombre):
-  database.registrar_usuario(usuario)
-  registro = database.registrar_api_key(usuario, nombre)
-  return {"id": registro["id"], "usuario": usuario, "api_key": registro["api_key"], "nombre": nombre, "creado_en": registro["creado_en"]}
+  new_user = database.registrar_usuario(usuario)
+  if new_user is not None:
+    registro = database.registrar_api_key(usuario, nombre)
+    return {"id": registro["id"], "usuario": registro["usuario"], "api_key": registro["api_key"], "nombre": registro["nombre"], "creado_en": registro["creado_en"]}
+  else:
+    raise Error_RegistroUsuarioInválido("No se pudo registrar el usuario correctamente.")
   

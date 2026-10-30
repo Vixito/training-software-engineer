@@ -2,7 +2,7 @@
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, HTTPException, Request, Query, Depends, Header
 from fastapi.responses import JSONResponse
-from models import SolicitudRespuesta, HistorialRespuesta, Input
+from models import SolicitudRespuesta, HistorialRespuesta, Solicitud, RegistroUsuario
 from services import verificar_limite, obtener_historial, service_registrar_usuario, Error_UsuarioNoEncontrado
 from typing import Literal
 import database, sqlite3, logging
@@ -61,7 +61,7 @@ async def root():
   return {"servicio": "AI Gateway", "estado": "activo"}
 
 @app.post("/solicitudes")
-async def solicitud(datos: Input, clave: dict = Depends(verificar_api_key)):
+async def solicitud(datos: Solicitud, clave: dict = Depends(verificar_api_key)):
   resultado_solicitud = verificar_limite(clave["usuario"], datos.solicitud)
 
   if not resultado_solicitud:
@@ -98,6 +98,7 @@ async def solicitudes_usuario(usuario: str, clave: dict = Depends(verificar_api_
   
   return {"count": total, "solicitudes": solicitudes}
 
-@app.post("/registro")
-async def registrar_usuario(usuario: Input, nombre: Input):
-  return service_registrar_usuario(usuario, nombre)
+@app.post("/registro", response_model=RegistroUsuario)
+async def registrar_usuario(usuario, nombre):
+  registro = service_registrar_usuario(usuario, nombre)
+  return {"usuario": usuario, "nombre": nombre}
