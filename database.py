@@ -218,7 +218,7 @@ def registrar_usuario_con_api_key(usuario, nombre):
     conexion.commit()
     return registro
 
-  except Exception:
+  except sqlite3.Error:
     conexion.rollback()
     raise
 
