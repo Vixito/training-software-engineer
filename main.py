@@ -43,8 +43,8 @@ async def manejar_usuario_no_encontrado(request: Request, exc: Error_UsuarioNoEn
     content={"detail": str(exc)}
   )
 
-@app.exception_handler(Error_RegistroUsuarioInválido)
-async def manejar_registro_de_usuario_invalido(request: Request, exc: Error_RegistroUsuarioInválido):
+@app.exception_handler(Error_RegistroUsuarioInvalido)
+async def manejar_registro_de_usuario_invalido(request: Request, exc: Error_RegistroUsuarioInvalido):
   return JSONResponse(
     status_code=409,
     content={"detail": str(exc)}

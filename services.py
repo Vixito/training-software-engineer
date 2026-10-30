@@ -28,5 +28,5 @@ def service_registrar_usuario(usuario, nombre):
     registro = database.registrar_api_key(usuario, nombre)
     return {"id": registro["id"], "usuario": registro["usuario"], "api_key": registro["api_key"], "nombre": registro["nombre"], "creado_en": registro["creado_en"]}
   else:
-    raise Error_RegistroUsuarioInválido("No se pudo registrar el usuario correctamente.")
+    raise Error_RegistroUsuarioInvalido("No se pudo registrar el usuario correctamente.")
   
