@@ -106,6 +106,6 @@ async def solicitudes_usuario(usuario: str, clave: dict = Depends(verificar_api_
   return {"count": total, "solicitudes": solicitudes}
 
 @app.post("/registro", response_model=RegistroUsuarioRespuesta)
-async def registrar_usuario(RegistroUsuario):
-  registro = service_registrar_usuario(usuario, nombre)
-  return {"usuario": usuario, "nombre": nombre, "api_key": registro["api_key"]}
+async def registrar_usuario(datos: RegistroUsuario):
+  registro = service_registrar_usuario(datos.usuario, datos.nombre)
+  return {"usuario": datos.usuario, "nombre": datos.nombre, "api_key": registro["api_key"]}
