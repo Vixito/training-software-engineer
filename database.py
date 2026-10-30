@@ -125,8 +125,9 @@ def registrar_usuario(usuario):
   conexion = conectar()
 
   try:
-    conexion.execute("INSERT OR IGNORE INTO usuarios (usuario) VALUES (?)", (usuario,))
+    cursor = conexion.execute("INSERT OR IGNORE INTO usuarios (usuario) VALUES (?)", (usuario,))
     conexion.commit()
+    return cursor.rowcount
   except sqlite3.Error:
     conexion.rollback()
     raise

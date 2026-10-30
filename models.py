@@ -24,6 +24,7 @@ class HistorialRespuesta(BaseModel):
 class RegistroUsuario(BaseModel):
   usuario: str = Field(..., min_length=1)
   nombre: str = Field(..., min_length=1)
+  api_key: str
 
   @field_validator("usuario", "nombre")
   @classmethod

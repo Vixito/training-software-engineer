@@ -43,6 +43,13 @@ async def manejar_usuario_no_encontrado(request: Request, exc: Error_UsuarioNoEn
     content={"detail": str(exc)}
   )
 
+@app.exception_handler(Error_RegistroUsuarioInválido)
+async def manejar_registro_de_usuario_invalido(request: Request, exc: Error_RegistroUsuarioInválido):
+  return JSONResponse(
+    status_code=404,
+    content={"detail": str(exc)}
+  )
+
 def verificar_api_key(api_key: str | None = Header(default=None, alias="X-Api-Key")):
   if not api_key:
     raise HTTPException(status_code=401, detail="Credenciales inválidas.")
@@ -98,7 +105,7 @@ async def solicitudes_usuario(usuario: str, clave: dict = Depends(verificar_api_
   
   return {"count": total, "solicitudes": solicitudes}
 
-@app.post("/registro", response_model=RegistroUsuario)
-async def registrar_usuario(usuario, nombre):
+@app.post("/registro")
+async def registrar_usuario(usuario: RegistroUsuario, nombre: RegistroUsuario):
   registro = service_registrar_usuario(usuario, nombre)
-  return {"usuario": usuario, "nombre": nombre}
+  return {"usuario": registro["usuario"], "nombre": registro["nombre"], "api_key": registro["api_key"]}
