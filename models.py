@@ -21,6 +21,14 @@ class HistorialRespuesta(BaseModel):
   count: int
   solicitudes: list[SolicitudRespuesta]
 
+class RegistroUsuarioRespuesta(BaseModel):
+  id: int
+  usuario: str
+  api_key: str
+  nombre: str
+  creado_en: float
+
+
 class RegistroUsuario(BaseModel):
   usuario: str = Field(..., min_length=1)
   nombre: str = Field(..., min_length=1)
@@ -32,3 +40,4 @@ class RegistroUsuario(BaseModel):
     if not valor:
       raise ValueError("El campo no puede estar vacío")
     return valor
+

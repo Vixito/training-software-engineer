@@ -2,7 +2,7 @@
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, HTTPException, Request, Query, Depends, Header
 from fastapi.responses import JSONResponse
-from models import SolicitudRespuesta, HistorialRespuesta, Solicitud, RegistroUsuario
+from models import SolicitudRespuesta, HistorialRespuesta, RegistroUsuarioRespuesta, Solicitud, RegistroUsuario
 from services import verificar_limite, obtener_historial, service_registrar_usuario, Error_UsuarioNoEncontrado, Error_RegistroUsuarioInvalido
 from typing import Literal
 import database, sqlite3, logging
@@ -105,7 +105,7 @@ async def solicitudes_usuario(usuario: str, clave: dict = Depends(verificar_api_
   
   return {"count": total, "solicitudes": solicitudes}
 
-@app.post("/registro", response_model=RegistroUsuario)
-async def registrar_usuario(usuario, nombre):
+@app.post("/registro", response_model=RegistroUsuarioRespuesta)
+async def registrar_usuario(RegistroUsuario):
   registro = service_registrar_usuario(usuario, nombre)
   return {"usuario": usuario, "nombre": nombre, "api_key": registro["api_key"]}
