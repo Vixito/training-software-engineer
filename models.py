@@ -1,14 +1,15 @@
 from pydantic import BaseModel, Field, field_validator, ValidationInfo
 
-class User(BaseModel):
+class Input(BaseModel):
   solicitud: str = Field(..., min_length=1)
+  user: str = Field(..., min_length=1)
 
-  @field_validator("solicitud")
+  @field_validator("solicitud", "usuario")
   @classmethod
   def validar_campo(cls, valor: str, info: ValidationInfo) -> str:
     valor = valor.strip()
     if not valor:
-      raise ValueError("La solicitud no puede estar vacía")
+      raise ValueError("El campo no puede estar vacío")
     return valor
 
 class SolicitudRespuesta(BaseModel):

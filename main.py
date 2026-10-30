@@ -2,14 +2,12 @@
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, HTTPException, Request, Query, Depends, Header
 from fastapi.responses import JSONResponse
-from models import User, SolicitudRespuesta, HistorialRespuesta
-from services import verificar_limite, obtener_historial, Error_UsuarioNoEncontrado
+from models import SolicitudRespuesta, HistorialRespuesta, Input
+from services import verificar_limite, obtener_historial, registrar_usuario, Error_UsuarioNoEncontrado
 from typing import Literal
 import database, sqlite3, logging
 
 # INICIO DE LA APLICACIÓN
-API_KEY = "clave_de_prueba"
-
 logging.basicConfig(
   level=logging.INFO,
   format="%(asctime)s - %(levelname)s - %(name)s - %(message)s"
@@ -18,10 +16,6 @@ logging.basicConfig(
 @asynccontextmanager
 async def lifespan(app: FastAPI):
   database.inicializar_db()
-
-  for usuario in ("carlos", "ana", "vixis"):
-    database.registrar_usuario(usuario)
-
   yield
 
 app = FastAPI(lifespan=lifespan)
@@ -67,7 +61,7 @@ async def root():
   return {"servicio": "AI Gateway", "estado": "activo"}
 
 @app.post("/solicitudes")
-async def solicitud(datos: User, clave: dict = Depends(verificar_api_key)):
+async def solicitud(datos: Input, clave: dict = Depends(verificar_api_key)):
   resultado_solicitud = verificar_limite(clave["usuario"], datos.solicitud)
 
   if not resultado_solicitud:
@@ -103,3 +97,7 @@ async def solicitudes_usuario(usuario: str, clave: dict = Depends(verificar_api_
     })
   
   return {"count": total, "solicitudes": solicitudes}
+
+@app.post("/registro")
+async def registrar_usuario(usuario: Input, nombre: Input):
+  return registrar_usuario(usuario, nombre)
