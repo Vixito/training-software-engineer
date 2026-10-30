@@ -3,7 +3,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI, HTTPException, Request, Query, Depends, Header
 from fastapi.responses import JSONResponse
 from models import SolicitudRespuesta, HistorialRespuesta, Solicitud, RegistroUsuario
-from services import verificar_limite, obtener_historial, service_registrar_usuario, Error_UsuarioNoEncontrado
+from services import verificar_limite, obtener_historial, service_registrar_usuario, Error_UsuarioNoEncontrado, Error_RegistroUsuarioInvalido
 from typing import Literal
 import database, sqlite3, logging
 
@@ -46,7 +46,7 @@ async def manejar_usuario_no_encontrado(request: Request, exc: Error_UsuarioNoEn
 @app.exception_handler(Error_RegistroUsuarioInválido)
 async def manejar_registro_de_usuario_invalido(request: Request, exc: Error_RegistroUsuarioInválido):
   return JSONResponse(
-    status_code=404,
+    status_code=409,
     content={"detail": str(exc)}
   )
 
@@ -105,7 +105,7 @@ async def solicitudes_usuario(usuario: str, clave: dict = Depends(verificar_api_
   
   return {"count": total, "solicitudes": solicitudes}
 
-@app.post("/registro")
-async def registrar_usuario(usuario: RegistroUsuario, nombre: RegistroUsuario):
+@app.post("/registro", response_model=RegistroUsuario)
+async def registrar_usuario(usuario, nombre):
   registro = service_registrar_usuario(usuario, nombre)
-  return {"usuario": registro["usuario"], "nombre": registro["nombre"], "api_key": registro["api_key"]}
+  return {"usuario": usuario, "nombre": nombre, "api_key": registro["api_key"]}
