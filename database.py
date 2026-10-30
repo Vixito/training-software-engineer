@@ -193,3 +193,34 @@ def historial(usuario, order, limite, desplazamiento, desde=None):
 
   finally:
     conexion.close()
+
+def registrar_usuario_con_api_key(usuario, nombre):
+  conexion = conectar()
+
+  try:
+    conexion.execute("BEGIN IMMEDIATE")
+
+    cursor = conexion.execute("INSERT OR IGNORE INTO usuarios (usuario) VALUES (?)", (usuario,))
+    
+    # Si el usuario existe, no continuamos.
+    if cursor.rowcount != 1:
+      conexion.rollback()
+      return None
+
+    # Creamos la API Key dentro de la misma transacción
+    api_key = generar_api_key()
+    key_hash = calcular_hash(api_key)
+    momento = time.time()
+
+    cursor = conexion.execute("INSERT INTO api_keys (usuario, key_hash, nombre, creado_en) VALUES (?, ?, ?, ?)", (usuario, key_hash, nombre, momento))
+    registro = {"id": cursor.lastrowid, "usuario": usuario, "api_key": api_key, "nombre": nombre, "creado_en": momento}
+    
+    conexion.commit()
+    return registro
+
+  except Exception:
+    conexion.rollback()
+    raise
+
+  finally:
+    conexion.close()
