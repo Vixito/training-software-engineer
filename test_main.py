@@ -301,6 +301,22 @@ def test_regeneracion_api_fallida(monkeypatch):
   assert clave_activa is not None
   assert clave_activa["nombre"] == "Mi aplicación"
 
+def test_registro_exitoso():
+  respuesta = client.post(
+    "/registro",
+    json={"usuario": "vixis", "nombre": "Mi aplicación"}
+  )
+
+  assert respuesta.status_code == 200
+  assert respuesta.json()["usuario"] == "vixis"
+  assert respuesta.json()["nombre"] == "Mi aplicación"
+  assert respuesta.json()["api_key"].startswith("vgw_")
+
+def test_registro_duplicado():
+  for _ in range(2):
+    response = client.post("/registro", json={"usuario": "ana", "nombre": "Prueba de aplicación"})
+
+  assert response.status_code == 409
 # ==============================================  
 API_KEY = "clave_de_prueba"
 HEADERS = {"X-API-Key": API_KEY}
