@@ -7,5 +7,6 @@ dependencies = [
   "fastapi",
   "uvicorn[standard]",
   "pytest",
-  "httpx"
+  "httpx",
+  "google-genai>=3.0.0",
 ]
