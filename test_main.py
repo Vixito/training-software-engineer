@@ -313,10 +313,11 @@ def test_registro_exitoso():
   assert respuesta.json()["api_key"].startswith("vgw_")
 
 def test_registro_duplicado():
-  for _ in range(2):
-    response = client.post("/registro", json={"usuario": "ana", "nombre": "Prueba de aplicación"})
+  primera_respuesta = client.post("/registro", json={"usuario": "ana", "nombre": "Prueba de aplicación"})
+  segunda_respuesta = client.post("/registro", json={"usuario": "ana", "nombre": "Prueba de aplicación"})
 
-  assert response.status_code == 409
+  assert primera_respuesta.status_code == 200
+  assert segunda_respuesta.status_code == 409
 # ==============================================  
 API_KEY = "clave_de_prueba"
 HEADERS = {"X-API-Key": API_KEY}
