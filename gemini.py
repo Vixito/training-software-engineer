@@ -51,10 +51,10 @@ class GeminiProvider:
           "completion_tokens": usage.candidates_token_count if usage else None,
           "total_tokens": usage.total_token_count if usage else None
         },
-        "finish_reason": {
+        "finish_reason": (
           str(response.candidates[0].finish_reason).split(".")[-1].lower()
           if response.candidates else None
-        }
+        )
       }
 
     except Exception as error:
