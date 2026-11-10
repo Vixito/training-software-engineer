@@ -304,11 +304,11 @@ def test_regeneracion_api_fallida(monkeypatch):
 def test_registro_exitoso():
   respuesta = client.post(
     "/registro",
-    json={"usuario": "vixis", "nombre": "Mi aplicación"}
+    json={"usuario": "nuevo_usuario", "nombre": "Mi aplicación"}
   )
 
   assert respuesta.status_code == 200
-  assert respuesta.json()["usuario"] == "vixis"
+  assert respuesta.json()["usuario"] == "nuevo_usuario"
   assert respuesta.json()["nombre"] == "Mi aplicación"
   assert respuesta.json()["api_key"].startswith("vgw_")
 
