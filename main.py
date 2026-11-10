@@ -2,10 +2,12 @@
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, HTTPException, Request, Query, Depends, Header
 from fastapi.responses import JSONResponse
-from models import SolicitudRespuesta, HistorialRespuesta, RegistroUsuarioRespuesta, Solicitud, RegistroUsuario
+from models import SolicitudRespuesta, HistorialRespuesta, RegistroUsuarioRespuesta, Solicitud, RegistroUsuario, ChatCompletionRequest, ChatCompletionResponse
 from services import verificar_limite, obtener_historial, service_registrar_usuario, Error_UsuarioNoEncontrado, Error_RegistroUsuarioInvalido
 from typing import Literal
 import database, sqlite3, logging
+import uuid
+from gemini import GeminiProvider, GeminiProviderError
 
 # INICIO DE LA APLICACIÓN
 logging.basicConfig(
@@ -19,7 +21,7 @@ async def lifespan(app: FastAPI):
   yield
 
 app = FastAPI(lifespan=lifespan)
-
+gemini = GeminiProvider()
 
 @app.exception_handler(sqlite3.Error)
 async def manejar_error_sqlite(request: Request, exc: sqlite3.Error):
@@ -109,3 +111,61 @@ async def solicitudes_usuario(usuario: str, clave: dict = Depends(verificar_api_
 async def registrar_usuario(datos: RegistroUsuario):
   registro = service_registrar_usuario(datos.usuario, datos.nombre)
   return registro
+
+@app.post("v1/chat/completions", response_model=ChatCompletionResponse)
+async def chat_completions(datos: ChatCompletionRequest, clave: dict = Depends(verificar_api_key)):
+  # Por ahora solamente admitimos generación normal
+  if datos.stream:
+    raise HTTPException(status_code=501, detail="El streaming todavía no está implementado.")
+
+  # Aplicamos el límite de solicitudes existente
+  resultado = verificar_limite(clave["usuario"], "[chat completion]")
+  if not resultado:
+    raise HTTPException(status_code=429, detail="Demasiadas solicitudes en un lapso de 60 segundos.")
+
+  try:
+    respuesta = await gemini.generate(
+      model=datos.model,
+      messages=datos.messages,
+      temperature=datos.temperature,
+      max_tokens=datos.max_tokens
+    )
+
+  except GeminiProviderError:
+    raise HTTPException(status_code=502, detail="El proveedor de IA no pudo procesar la solicitud.")
+
+  # Normalizamos la razón de finalización
+  finish_reason = respuesta["finish_reason"]
+  finish_reason = {
+    "max_tokens": "length",
+    "max_output_tokens": "length",
+    "safety": "content_filter"
+  }.get(finish_reason, finish_reason)
+
+  usage = respuesta["usage"]
+
+  if all(value is not None for value in usage.values()):
+    usage = {
+      "prompt_tokens": usage["prompt_tokens"],
+      "completion_tokens": usage["completion_tokens"],
+      "total_tokens": usage["total_tokens"]
+    }
+  else:
+    usage = None
+
+  return {
+    "id": f"chatcmpl-{uuid.uuid4().hex}",
+    "created": int(time.time()),
+    "model": datos.model,
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": respuesta["content"]
+        },
+        "finish_reason": finish_reason
+      }
+    ],
+    "usage": usage
+  }
