@@ -6,6 +6,7 @@ from models import SolicitudRespuesta, HistorialRespuesta, RegistroUsuarioRespue
 from services import verificar_limite, obtener_historial, service_registrar_usuario, Error_UsuarioNoEncontrado, Error_RegistroUsuarioInvalido
 from typing import Literal
 import database, sqlite3, logging
+import time
 import uuid
 from gemini import GeminiProvider, GeminiProviderError
 
@@ -112,7 +113,7 @@ async def registrar_usuario(datos: RegistroUsuario):
   registro = service_registrar_usuario(datos.usuario, datos.nombre)
   return registro
 
-@app.post("v1/chat/completions", response_model=ChatCompletionResponse)
+@app.post("/v1/chat/completions", response_model=ChatCompletionResponse)
 async def chat_completions(datos: ChatCompletionRequest, clave: dict = Depends(verificar_api_key)):
   # Por ahora solamente admitimos generación normal
   if datos.stream:

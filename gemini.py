@@ -36,7 +36,7 @@ class GeminiProvider:
 
     try:
       async with genai.Client(api_key=api_key).aio as client:
-        response = await client.models.generate.content(
+        response = await client.models.generate_content(
           model=model,
           contents=contents,
           config=config
