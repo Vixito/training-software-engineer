@@ -18,9 +18,9 @@ def conectar_postgres():
 def inicializar_db_postgres():
   with conectar_postgres() as conexion:
     conexion.execute("CREATE TABLE IF NOT EXISTS usuarios (usuario TEXT PRIMARY KEY)")
-    conexion.execute(""""
+    conexion.execute("""
       CREATE TABLE IF NOT EXISTS api_keys (
-        id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY
+        id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
         usuario TEXT NOT NULL REFERENCES usuarios(usuario),
         key_hash TEXT NOT NULL UNIQUE,
         nombre TEXT NOT NULL,
