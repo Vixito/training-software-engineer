@@ -1,4 +1,4 @@
-import sqlite3, secrets, hashlib, time
+import sqlite3, secrets, hashlib, time, os, psycopg
 
 DB_PATH = "ai_gateway.db"
 
@@ -6,6 +6,35 @@ def conectar():
   conexion = sqlite3.connect(DB_PATH)
   conexion.execute("PRAGMA foreign_keys = ON")
   return conexion
+
+def conectar_postgres():
+  database_url = os.getenv("DATABASE_URL")
+
+  if not database_url:
+    raise RuntimeError("DATABASE_URL no está configurada")
+
+  return psycopg.connect(database_url, connect_timeout=10)
+
+def inicializar_db_postgres():
+  with conectar_postgres() as conexion:
+    conexion.execute("CREATE TABLE IF NOT EXISTS usuarios (usuario TEXT PRIMARY KEY)")
+    conexion.execute(""""
+      CREATE TABLE IF NOT EXISTS api_keys (
+        id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY
+        usuario TEXT NOT NULL REFERENCES usuarios(usuario),
+        key_hash TEXT NOT NULL UNIQUE,
+        nombre TEXT NOT NULL,
+        creado_en DOUBLE PRECISION NOT NULL,
+        revocado_en DOUBLE PRECISION
+      )""")
+    conexion.execute("""
+      CREATE TABLE IF NOT EXISTS solicitudes(
+        id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+        usuario TEXT NOT NULL REFERENCES usuarios(usuario),
+        solicitud TEXT NOT NULL,
+        creado_en DOUBLE PRECISION NOT NULL
+      )
+    """)
 
 def generar_api_key():
   return "vgw_" + secrets.token_urlsafe(32)
